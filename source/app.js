@@ -4,6 +4,7 @@ import Modal from 'react-modal';
 import {Button} from 'react-bootstrap'
 import {linkNodes, wrapToSvg} from './curveDrawer.js'
 import {nodesMap, getChildrenForRoot, countNodeDepth} from './nodes-dao.js'
+import {settings} from './configs.js'
 import $ from 'jquery'
 
 ReactDOM.render(<div id="app" />, document.body);
@@ -13,19 +14,20 @@ function rerender(){
 	ReactDOM.render(<Main />, app);
 }
 
-var nodeWidth = 100
-var nodeHeight = 50
-
 var mapWidth = 1000
 var mapHeight = 400
-
-var nodesMarginW = nodeWidth*2//200
-var nodesMarginH = nodeHeight*0.3 //20
 
 class Main extends React.Component {
 	constructor(props){
 		super(props);
 		this.state = {}
+
+		this.changeScale = this.changeScale.bind(this)
+	}
+
+	changeScale(type){
+		settings.changeScale(type)
+		this.setState({})
 	}
 
 	render() {
@@ -34,7 +36,11 @@ class Main extends React.Component {
 		return (
 			<div>
 				Modelege
-				<div id='map' class='map' style={{width:mapWidth, height:mapHeight}}>
+				<div>
+					<Button onClick = {this.changeScale.bind(this, 'plus')}>+</Button>
+					<Button onClick = {this.changeScale.bind(this, 'minus')}>-</Button>
+				</div>
+				<div id='map' class='map' style={{height:mapHeight}}>
 					{drawNodes(nodesMap, linkCurves, scene)}
 					{wrapToSvg(linkCurves, scene)}
 				</div>
@@ -51,11 +57,11 @@ var drawNodes = function(nodes, curves, scene){
 
 	countNodeDepth(root)
 	countScene(rootChildren.left, rootChildren.right, scene)
-	scene.h = scene.h*(nodeHeight+nodesMarginH)
-	scene.w = (scene.w+1)*(nodesMarginW) // +1 for root node
+	scene.h = scene.h*(settings.nodeHeight+settings.nodesMarginH)
+	scene.w = (scene.w+1)*(settings.nodesMarginW) // +1 for root node
 
-	root.gui.x = (scene.w/2) - nodeWidth/2 + nodeWidth
-	root.gui.y = (scene.h/2) - nodeHeight/2
+	root.gui.x = (scene.w/2) - settings.nodeWidth/2 + settings.nodeWidth
+	root.gui.y = (scene.h/2) - settings.nodeHeight/2
 
 	result.push(getDiv(root))
 	drawChildren(rootChildren.left, 'left', root, result, curves)
@@ -64,9 +70,9 @@ var drawNodes = function(nodes, curves, scene){
 }
 
 var drawChildren = function(childNodes, position, root, result, curves){
-	const nodePlusMargin = nodeHeight+nodesMarginH
-	const allNodesHeight = childNodes.length*(nodeHeight+nodesMarginH)
-	const xpos = position=='left'? root.gui.x-nodesMarginW: root.gui.x+nodesMarginW
+	const nodePlusMargin = settings.nodeHeight+settings.nodesMarginH
+	const allNodesHeight = childNodes.length*(settings.nodeHeight+settings.nodesMarginH)
+	const xpos = position=='left'? root.gui.x-settings.nodesMarginW: root.gui.x+settings.nodesMarginW
 	const nodesHeight = countSceneOneSide(childNodes).h
 	const ymax = root.gui.y-(nodesHeight/2)*nodePlusMargin
 
@@ -77,8 +83,8 @@ var drawChildren = function(childNodes, position, root, result, curves){
 		currentNode.gui.y = ypos + (nodePlusMargin*currentNode.gui.h)/2
 		result.push(getDiv(currentNode))
 		curves.push(linkNodes(
-			{lx: root.gui.x, w: nodeWidth, my: root.gui.y+nodeHeight/2},
-			{lx: currentNode.gui.x, w: nodeWidth, my: currentNode.gui.y+nodeHeight/2}))
+			{lx: root.gui.x, w: settings.nodeWidth, my: root.gui.y+settings.nodeHeight/2},
+			{lx: currentNode.gui.x, w: settings.nodeWidth, my: currentNode.gui.y+settings.nodeHeight/2}))
 		if(childNodes[i].children.length>0){
 			drawChildren(childNodes[i].children, position, childNodes[i], result,  curves)
 		}
@@ -120,7 +126,7 @@ var countSceneOneSide = function(nodes){
 
 
 var getDiv = function(node){
-	return <div class='node' style={{left: node.gui.x, top: node.gui.y, width: nodeWidth, height: nodeHeight}}>
+	return <div class='node' style={{left: node.gui.x, top: node.gui.y, width: settings.nodeWidth, height: settings.nodeHeight}}>
 		{node.name}
 	</div>
 }
