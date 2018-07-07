@@ -1,0 +1,20 @@
+/* .modal-container {
+  position: relative;
+}
+.modal-container .modal, .modal-container .modal-backdrop {
+  position: absolute;
+} */
+
+.map {
+  position: relative;
+  border: 1px solid red;
+  overflow: auto;
+}
+
+.node {
+  position: absolute;
+  /* width: 100px;
+  height: 100px; */
+  border: 1px solid black;
+  border-radius: 5px;
+}
